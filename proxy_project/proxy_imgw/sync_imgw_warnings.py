@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from proxy_imgw.models import Warning
 
 
-IMGW_URL = 'https://danepubliczne.imgw.pl/api/data/warningsmeteo'
+IMGW_URL = "https://danepubliczne.imgw.pl/api/data/warningsmeteo"
 
 
 class IMGWFetcher:
@@ -28,7 +28,11 @@ class IMGWFetcher:
             r.raise_for_status()
             data = r.json()
 
-            return data if isinstance(data, list) else data.get('warnings', []) if isinstance(data, dict) else []
+            return (
+                data
+                if isinstance(data, list)
+                else data.get("warnings", []) if isinstance(data, dict) else []
+            )
         except requests.RequestException as e:
             print(f"Encountered an error during the fetch of data from IMGW API: {e}")
             return []
@@ -53,19 +57,18 @@ class WarningProcessor:
         """
 
         return {
-            'imgw_id': str(item.get('id') or item.get('symbol') or item.get('uuid')),
-            'title': item.get('nazwa_zdarzenia'),
-            'level': item.get('stopien'),
-            'possibility': item.get('prawdopodobienstwo'),
-            'start': item.get('obowiazuje_od'),
-            'end': item.get('obowiazuje_do'),
-            'published': item.get('opublikowano'),
-            'description': item.get('tresc'),
-            'comment': item.get('komentarz'),
-            'office': item.get('biuro'),
-            'areas': item.get('teryt'),
-
-            'raw': item,
+            "imgw_id": str(item.get("id") or item.get("symbol") or item.get("uuid")),
+            "title": item.get("nazwa_zdarzenia"),
+            "level": item.get("stopien"),
+            "possibility": item.get("prawdopodobienstwo"),
+            "start": item.get("obowiazuje_od"),
+            "end": item.get("obowiazuje_do"),
+            "published": item.get("opublikowano"),
+            "description": item.get("tresc"),
+            "comment": item.get("komentarz"),
+            "office": item.get("biuro"),
+            "areas": item.get("teryt"),
+            "raw": item,
         }
 
 
@@ -89,14 +92,15 @@ class WarningService:
                   was updated.
         """
 
-        if processed_data['imgw_id'] and processed_data['imgw_id'] != 'None':
+        if processed_data["imgw_id"] and processed_data["imgw_id"] != "None":
             obj, created = Warning.objects.update_or_create(
-                imgw_id=processed_data['imgw_id'],
-                defaults=processed_data
+                imgw_id=processed_data["imgw_id"], defaults=processed_data
             )
             return created
         else:
-            qs = Warning.objects.filter(title=processed_data['title'], start=processed_data['start'])
+            qs = Warning.objects.filter(
+                title=processed_data["title"], start=processed_data["start"]
+            )
             if qs.exists():
                 w = qs.first()
                 for key, value in processed_data.items():
@@ -117,7 +121,7 @@ class CommandManager(BaseCommand):
     the database.
     """
 
-    help = 'Fetch current meteorological warnings from IMGW and store them in db'
+    help = "Fetch current meteorological warnings from IMGW and store them in db"
 
     def handle(self, *args, **options):
         """
@@ -129,7 +133,7 @@ class CommandManager(BaseCommand):
         reports the number of inserted and updated records.
         """
 
-        self.stdout.write('Fetching IMGW warnings...')
+        self.stdout.write("Fetching IMGW warnings...")
 
         fetcher = IMGWFetcher()
         processor = WarningProcessor()
@@ -149,4 +153,6 @@ class CommandManager(BaseCommand):
             else:
                 updated += 1
 
-        self.stdout.write(self.style.SUCCESS(f'Inserted: {inserted}, Updated: {updated}'))
+        self.stdout.write(
+            self.style.SUCCESS(f"Inserted: {inserted}, Updated: {updated}")
+        )

@@ -12,15 +12,18 @@ class Command(BaseCommand):
     as a MultiPolygon object in the `County` model. It requires the file path,
     TERYT code, and county name as arguments.
     """
-    help = 'Import county from GML file'
+
+    help = "Import county from GML file"
 
     def add_arguments(self, parser):
         """
         Adds command-line arguments for the GML file path, TERYT code, and name.
         """
-        parser.add_argument('gml_file', type=str)
-        parser.add_argument('--teryt', type=str, help='Teryt code ex. 0401', required=True)
-        parser.add_argument('--name', type=str, help='County name', required=True)
+        parser.add_argument("gml_file", type=str)
+        parser.add_argument(
+            "--teryt", type=str, help="Teryt code ex. 0401", required=True
+        )
+        parser.add_argument("--name", type=str, help="County name", required=True)
 
     def handle(self, *args, **options):
         """
@@ -31,20 +34,24 @@ class Command(BaseCommand):
         data to the database.
         """
 
-        file_path = options['gml_file']
-        teryt = options['teryt']
-        name = options['name']
+        file_path = options["gml_file"]
+        teryt = options["teryt"]
+        name = options["name"]
 
         tree = etree.parse(file_path)
-        ns = {'gml': 'http://www.opengis.net/gml/3.2'}
+        ns = {"gml": "http://www.opengis.net/gml/3.2"}
 
         polygons = []
-        for posList in tree.xpath('//gml:Polygon/gml:exterior/gml:LinearRing/gml:posList', namespaces=ns):
+        for posList in tree.xpath(
+            "//gml:Polygon/gml:exterior/gml:LinearRing/gml:posList", namespaces=ns
+        ):
             coords_text = posList.text.strip()
             coords_pairs = coords_text.split()
             # EPSG:2180 -> pary X Y
-            coords = [(float(coords_pairs[i]), float(coords_pairs[i+1]))
-                      for i in range(0, len(coords_pairs), 2)]
+            coords = [
+                (float(coords_pairs[i]), float(coords_pairs[i + 1]))
+                for i in range(0, len(coords_pairs), 2)
+            ]
 
             poly = Polygon(coords)
             polygons.append(poly)
@@ -52,8 +59,7 @@ class Command(BaseCommand):
         if polygons:
             mp = MultiPolygon(polygons)
             County.objects.update_or_create(
-                teryt=teryt,
-                defaults={'name': name, 'boundaries': mp}
+                teryt=teryt, defaults={"name": name, "boundaries": mp}
             )
             self.stdout.write(self.style.SUCCESS(f"Imported {name}"))
         else:

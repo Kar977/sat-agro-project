@@ -6,7 +6,7 @@ command_manager = CommandManager()
 
 
 class Command(BaseCommand):
-    help = 'Synchronizes IMGW warnings from the API.'
+    help = "Synchronizes IMGW warnings from the API."
 
     def handle(self, *args, **options):
         """

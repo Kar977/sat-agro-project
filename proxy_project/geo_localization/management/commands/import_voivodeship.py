@@ -5,13 +5,13 @@ from geo_localization.models import Voivodeship
 
 
 class Command(BaseCommand):
-    help = 'Import boundaries of voivodeship from GML (EPSG:2180) file'
+    help = "Import boundaries of voivodeship from GML (EPSG:2180) file"
 
     def add_arguments(self, parser):
-        parser.add_argument('file', type=str)
+        parser.add_argument("file", type=str)
 
     def handle(self, *args, **options):
-        file = options['file']
+        file = options["file"]
         ds = DataSource(file)
         layer = ds[0]
 
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         transform = CoordTransform(src_srs, dst_srs)
 
         for feature in layer:
-            name = feature.get('JPT_NAZWA') or feature.get('NAZWA') or 'unknown'
+            name = feature.get("JPT_NAZWA") or feature.get("NAZWA") or "unknown"
 
             geom = feature.geom.geos  # geometria jako GEOS
             geom.transform(transform)  # przekształć do WGS84
@@ -31,4 +31,4 @@ class Command(BaseCommand):
 
             Voivodeship.objects.create(name=name, boundaries=geom)
 
-        self.stdout.write(self.style.SUCCESS('Imported voivodeships from .GML'))
+        self.stdout.write(self.style.SUCCESS("Imported voivodeships from .GML"))

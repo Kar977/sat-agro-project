@@ -12,6 +12,7 @@ class WarningListView(generics.ListAPIView):
     """
     API view to list all meteorological warnings.
     """
+
     queryset = Warning.objects.all()
     serializer_class = WarningSerializer
 
@@ -20,11 +21,12 @@ class WarningDetailView(generics.RetrieveAPIView):
     """
     API view to retrieve a single meteorological warning by its ID.
     """
+
     queryset = Warning.objects.all()
     serializer_class = WarningSerializer
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def warnings_by_location(request):
     """
     API endpoint to get current IMGW warnings for a specific location.
@@ -45,12 +47,12 @@ def warnings_by_location(request):
     serializer = LocationQuerySerializer(data=request.GET)
     serializer.is_valid(raise_exception=True)
 
-    lat = serializer.validated_data['lat']
-    lon = serializer.validated_data['lon']
+    lat = serializer.validated_data["lat"]
+    lon = serializer.validated_data["lon"]
 
     teryt = get_teryt_from_coords(lat, lon)
     if not teryt:
-        return Response({'error': 'Cant find county for given coordinates'}, status=404)
+        return Response({"error": "Cant find county for given coordinates"}, status=404)
 
     now = timezone.now()
 
@@ -58,7 +60,4 @@ def warnings_by_location(request):
 
     warnings_data = WarningSerializer(qs, many=True).data
 
-    return Response({
-        'teryt': teryt,
-        'warnings': warnings_data
-    })
+    return Response({"teryt": teryt, "warnings": warnings_data})

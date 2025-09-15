@@ -7,6 +7,7 @@ class Warning(models.Model):
     Store IMGW meteorological warnings.
     We store key fields and the raw JSON payload.
     """
+
     teryt = models.CharField(max_length=4, db_index=True)
     imgw_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     title = models.CharField(max_length=255)
@@ -22,10 +23,8 @@ class Warning(models.Model):
     raw = models.JSONField()
     fetched_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
-        ordering = ['-start']
-
+        ordering = ["-start"]
 
     def __str__(self):
         return f"{self.title} ({self.level})"

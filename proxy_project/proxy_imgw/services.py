@@ -2,6 +2,7 @@ from django.utils import timezone
 from geo_localization.views import get_teryt_from_coords
 from proxy_imgw.models import Warning
 
+
 def get_warnings_for_location(lat, lon):
     """
     Fetches active meteorological warnings for a given geographical location.

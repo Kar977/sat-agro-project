@@ -20,6 +20,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("warnings/", include('proxy_imgw.urls')),
-    path('localization/', include('geo_localization.urls')),
+    path("warnings/", include("proxy_imgw.urls")),
+    path("localization/", include("geo_localization.urls")),
 ]

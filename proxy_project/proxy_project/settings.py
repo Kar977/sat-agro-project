@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "proxy_imgw.apps.ProxyImgwConfig",
     "geo_localization.apps.GeoLocalizationConfig",
-    'django.contrib.gis',
+    "django.contrib.gis",
 ]
 
 MIDDLEWARE = [
@@ -81,13 +81,13 @@ WSGI_APPLICATION = "proxy_project.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get("POSTGRES_DB_NAME"),
-        'USER': os.environ.get("POSTGRES_USER"),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        'HOST': os.environ.get("POSTGRES_HOST"),
-        'PORT': os.environ.get("POSTGRES_PORT"),
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.environ.get("POSTGRES_DB_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
 
