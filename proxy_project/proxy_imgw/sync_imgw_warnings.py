@@ -1,7 +1,7 @@
 import requests
 from dateutil import parser as dtparser
 from django.core.management.base import BaseCommand
-from proxy.models import Warning
+from proxy_imgw.models import Warning
 
 
 IMGW_URL = 'https://danepubliczne.imgw.pl/api/data/warningsmeteo'

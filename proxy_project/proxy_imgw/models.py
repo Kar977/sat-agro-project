@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator
 from django.db import models
 
 
@@ -10,7 +11,7 @@ class Warning(models.Model):
     imgw_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     title = models.CharField(max_length=255)
     level = models.CharField(max_length=50, blank=True, null=True)
-    possibility = models.IntegerField(max_length=2)
+    possibility = models.PositiveIntegerField(validators=[MaxValueValidator(100)])
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     published = models.DateTimeField(blank=True, null=True)

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from proxy.sync_imgw_warnings import CommandManager
+from proxy_imgw.sync_imgw_warnings import CommandManager
 
 
 command_manager = CommandManager()
