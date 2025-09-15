@@ -1,34 +1,60 @@
-from django.core.management.base import BaseCommand
-from django.contrib.gis.gdal import DataSource, CoordTransform, SpatialReference
 from django.contrib.gis.geos import MultiPolygon, Polygon
+from django.core.management.base import BaseCommand
 from geo_localization.models import County
+from lxml import etree
 
 
 class Command(BaseCommand):
-    help = 'Import county boundaries from GML (EPSG:2180) file'
+    """
+    Django management command to import county boundaries from a GML file.
+
+    This command parses a GML file to extract polygon coordinates and saves them
+    as a MultiPolygon object in the `County` model. It requires the file path,
+    TERYT code, and county name as arguments.
+    """
+    help = 'Import county from GML file'
 
     def add_arguments(self, parser):
-        parser.add_argument('file', type=str)
+        """
+        Adds command-line arguments for the GML file path, TERYT code, and name.
+        """
+        parser.add_argument('gml_file', type=str)
+        parser.add_argument('--teryt', type=str, help='Teryt code ex. 0401', required=True)
+        parser.add_argument('--name', type=str, help='County name', required=True)
 
     def handle(self, *args, **options):
-        file = options['file']
-        ds = DataSource(file)
-        layer = ds[0]
+        """
+        The main logic of the command.
 
-        # Transformacja z EPSG:2180 do WGS84 (EPSG:4326)
-        src_srs = SpatialReference(2180)
-        dst_srs = SpatialReference(4326)
-        transform = CoordTransform(src_srs, dst_srs)
+        This method reads a GML file, extracts all polygon coordinates (assuming EPSG:2180 X Y pairs),
+        creates a MultiPolygon from them, and then uses `update_or_create` to save the county
+        data to the database.
+        """
 
-        for feature in layer:
-            name = feature.get('JPT_NAZWA') or feature.get('NAZWA') or 'unknown'
+        file_path = options['gml_file']
+        teryt = options['teryt']
+        name = options['name']
 
-            geom = feature.geom.geos  # geometria jako GEOS
-            geom.transform(transform)  # przekształć do WGS84
+        tree = etree.parse(file_path)
+        ns = {'gml': 'http://www.opengis.net/gml/3.2'}
 
-            if isinstance(geom, Polygon):
-                geom = MultiPolygon(geom)
+        polygons = []
+        for posList in tree.xpath('//gml:Polygon/gml:exterior/gml:LinearRing/gml:posList', namespaces=ns):
+            coords_text = posList.text.strip()
+            coords_pairs = coords_text.split()
+            # EPSG:2180 -> pary X Y
+            coords = [(float(coords_pairs[i]), float(coords_pairs[i+1]))
+                      for i in range(0, len(coords_pairs), 2)]
 
-            Voivodeship.objects.create(name=name, boundaries=geom)
+            poly = Polygon(coords)
+            polygons.append(poly)
 
-        self.stdout.write(self.style.SUCCESS('Imported county from .GML'))
+        if polygons:
+            mp = MultiPolygon(polygons)
+            County.objects.update_or_create(
+                teryt=teryt,
+                defaults={'name': name, 'boundaries': mp}
+            )
+            self.stdout.write(self.style.SUCCESS(f"Imported {name}"))
+        else:
+            self.stdout.write(self.style.WARNING("Can't find geometry"))

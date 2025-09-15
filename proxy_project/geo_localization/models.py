@@ -13,9 +13,10 @@ class County(models.Model):
         name (str): The unique name of the county.
         boundaries (MultiPolygonField): The geographical boundaries of the county.
     """
+    teryt = gis_models.CharField(max_length=4, unique=True)
+    name = gis_models.CharField(max_length=255)
+    boundaries = gis_models.MultiPolygonField(srid=2180)
 
-    name = models.CharField(max_length=100, unique=True)
-    boundaries = gis_models.MultiPolygonField(srid=4326)
 
     def __str__(self):
         return self.name
